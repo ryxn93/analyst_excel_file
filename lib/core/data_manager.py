@@ -7,6 +7,8 @@ def filter_by_province(data, province_filter):
     df = pd.read_excel(data) 
     province = str(province_filter).strip().upper()  # Normalize case and trim  
     
+    
+    # Filtering the DataFrame  
     try:  
         filtered_data = df.loc[df['provinsi'] == province]  
         return filtered_data

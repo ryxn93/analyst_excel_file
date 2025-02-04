@@ -82,6 +82,7 @@ def main():
             'payment_date': 'tanggal_pembayaran'  
         }  
 
+
         # Rename columns based on the mapping  
         hasil.rename(columns=column_mapping, inplace=True)  
 

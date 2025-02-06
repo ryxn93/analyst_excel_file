@@ -1,113 +1,103 @@
-import os  
-import sys  
 import pandas as pd  
-from search_folder import find_excel_file  
 
-def read_sheet(nama_file):  
+from lib.utils.logger import Logger as L
+
+def read_sheets_name(file_name):  
     try:  
-        data = []  
-        excel_file = pd.ExcelFile(nama_file)  
-        for _, sheet in enumerate(excel_file.sheet_names):  
-            data.append(sheet)  
-        return data  
+        excel_file = pd.ExcelFile(file_name)  
+        return excel_file.sheet_names
     except FileNotFoundError:  
-        print(f"File '{nama_file}' not found!")  
+        L.error(f"File '{file_name}' not found!")  
     except Exception as e:  
-        print(f"Error: {e}")  
+        L.error(f"Error: {e}")  
         return None  
 
-def read_column(nama_file, sheet_name):  
+def read_columns_name(file_name, sheet_name):  
     try:  
-        rescol = []  
-        excel_file = pd.read_excel(nama_file, sheet_name=sheet_name)  
-        for col in excel_file.columns:  
-            rescol.append(col)  
-        return rescol  
+        excel_file = pd.read_excel(file_name, sheet_name=sheet_name)  
+        return list(excel_file.columns)
     except FileNotFoundError:  
-        print(f"Error: file '{nama_file}' tidak ditemukan!")  
+        L.error(f"File {file_name} not found!")  
         return None  
     except KeyError as e:  
-        print(f"Error: kolom '{e}' tidak ditemukan didalam file excel!")  
+        L.error(f"Coulmn not found")  
         return None  
     except Exception as e:  
-        print(f"terjadi kesalahan: {e}")  
+        L.error(f"{e}")  
         return None  
 
-def read_data(nama_file, sheet_name, columns):  
+def read_data_in_column(file_name, sheet_name, columns):  
     try:  
-        excel_file = pd.read_excel(nama_file, sheet_name=sheet_name)  
+        excel_file = pd.read_excel(file_name, sheet_name=sheet_name)  
         selected_data = excel_file[columns]  
-        return selected_data  
+        return selected_data[0:11]
     except KeyError as e:  
-        print(f"Error: kolom '{e}' tidak ditemukan!")  
+        L.error(f"Coulmn not found")  
         return None  
     except Exception as e:  
-        print(f"terjadi kesalahan: {e}")  
+        L.error(f"{e}")
         return None  
+    
+
+def convert_seconds(seconds):  
+    if pd.isnull(seconds):  
+        return "N/A"  
+    seconds = int(seconds)  
+    days = seconds // 86400  
+    hours = (seconds % 86400) // 3600  
+    minutes = (seconds % 3600) // 60  
+    seconds = seconds % 60  
+    return f"{days:02d} D, {hours:02d}h:{minutes:02d}m:{seconds:02d}s"  
 
 def main():  
-    file_name = "../../data/Data Pengajuan - Penerbitan 2024-11.xlsx"  
+    file_name = "./data/Data Pengajuan - Penerbitan 2024-11.xlsx"  
     
-    sheets = read_sheet(file_name)  
+    sheets = read_sheets_name(file_name)  
     
     for i, sheet in enumerate(sheets):  
         print(f"[{i}] {sheet}")  
-    input_sheet = int(input("enter sheet number: "))   
+    # input_sheet = int(input("enter sheet number: "))   
+    
+    input_sheet = 0
     sheet_name = sheets[input_sheet]  
     
-    selected_columns_excel_file = read_column(file_name, sheet_name)  
+    selected_columns_excel_file = read_columns_name(file_name, sheet_name)  
+    
     if selected_columns_excel_file is not None:  
         for j, listcol in enumerate(selected_columns_excel_file):  
             print(f"[{j}] {listcol}")  
         
-        column_indices = input("Input column indices (comma-separated): ")  
+        # column_indices = input("Input column indices (comma-separated): ")  
+        input_columns = "6, 7, 8, 9"
+        
         try:  
-            indices = [int(i) for i in column_indices.split(",")]  
-            columns = [selected_columns_excel_file[i] for i in indices]  
+            split_by_comma = [int(i) for i in input_columns.split(",")]  
+            select_columns_by_index = [selected_columns_excel_file[i] for i in split_by_comma]  
         except (ValueError, IndexError):  
-            print("Input tidak valid. Pastikan menggunakan indeks yang benar.")  
+            L.error("Invalid input, please enter right index!")  
             return  
 
-    hasil = read_data(file_name, sheet_name, columns)  
-    if hasil is not None:  
-        print(f"Data from columns '{columns}':")  
-        # print("test", hasil)  
+    data_columnn = read_data_in_column(file_name, sheet_name, select_columns_by_index)  
+    
+    if data_columnn is None:
+        return 
+    
+    for col in select_columns_by_index:
+        data_columnn[col] = pd.to_datetime(data_columnn[col], errors="coerce")
+    
+    if len(select_columns_by_index) % 2 != 0:
+        L.error("invalid column")
+        return
+    
+    for i in range(0, len(select_columns_by_index), 2):
+        start_col = select_columns_by_index[i]
+        end_col = select_columns_by_index[i + 1]
         
-        # Define the mapping of input column names to required names  
-        column_mapping = {  
-            'submit_date': 'tanggal_submit',  
-            'validation_date': 'tgl_validasi',  
-            'published_date': 'tanggal_terbit',  
-            'payment_date': 'tanggal_pembayaran'  
-        }  
+        interval_col = f"interval_seconds_{i//2 + 1}"
+        data_columnn[interval_col] = (data_columnn[end_col] - data_columnn[start_col]).dt.total_seconds()
+        data_columnn[f"interval_waktu_{i//2 + 1}"] = data_columnn[interval_col].apply(convert_seconds)
 
-
-        # Rename columns based on the mapping  
-        hasil.rename(columns=column_mapping, inplace=True)  
-
-        required_columns = ['tanggal_submit', 'tgl_validasi', 'tanggal_terbit', 'tanggal_pembayaran']  
-        if all(col in hasil.columns for col in required_columns):  
-            for col in required_columns:  
-                hasil[col] = pd.to_datetime(hasil[col], errors='coerce')  
-            
-            hasil['interval_seconds_validasi'] = (hasil['tgl_validasi'] - hasil['tanggal_submit']).dt.total_seconds()  
-            hasil['interval_seconds_terbit'] = (hasil['tanggal_terbit'] - hasil['tanggal_pembayaran']).dt.total_seconds()  
-            
-            def convert_seconds(seconds):  
-                if pd.isnull(seconds):  
-                    return "N/A"  
-                seconds = int(seconds)  
-                days = seconds // 86400  
-                hours = (seconds % 86400) // 3600  
-                minutes = (seconds % 3600) // 60  
-                seconds = seconds % 60  
-                return f"{days} hari, {hours} jam, {minutes} menit, {seconds} detik"  
-
-            hasil['interval_waktu_validasi'] = hasil['interval_seconds_validasi'].apply(convert_seconds)  
-            hasil['interval_waktu_terbit'] = hasil['interval_seconds_terbit'].apply(convert_seconds)  
-            print(hasil)  
-        else:  
-            print("Kolom yang diperlukan tidak lengkap dalam data.")  
+    print(data_columnn)
 
 if __name__ == "__main__":  
     try:  

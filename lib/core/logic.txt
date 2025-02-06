@@ -1,2 +1,2 @@
 hasil[f'interval_seconds_{col}'] = (hasil[col].shift(1) - hasil[col]).dt.total_seconds()
-# baris
+# baris 

@@ -7,14 +7,13 @@ def read_sheet(nama_file):
     try:  
         data = []  
         excel_file = pd.ExcelFile(nama_file)  
-        print("File excel berhasil dibaca!")  
-        for i, sheet in enumerate(excel_file.sheet_names):  
+        for _, sheet in enumerate(excel_file.sheet_names):  
             data.append(sheet)  
         return data  
     except FileNotFoundError:  
-        print(f"Error, file '{nama_file}' tidak ditemukan!")  
+        print(f"File '{nama_file}' not found!")  
     except Exception as e:  
-        print(f"Error, terjadi kesalahan: {e}")  
+        print(f"Error: {e}")  
         return None  
 
 def read_column(nama_file, sheet_name):  

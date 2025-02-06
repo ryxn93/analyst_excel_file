@@ -5,19 +5,18 @@ from search_folder import find_excel_file
 # sys.path.append(os.path.abspath('../lib/core'))
 # print("Python Path:", sys.path)
 
-def read_sheet(nama_file):
-    try:
-        data = []
-        excel_file = pd.ExcelFile(nama_file)
-        print("File excel berhasil dibaca!")
-        for i, sheet in enumerate(excel_file.sheet_names):
-            data.append(sheet)
-        return data
-    except FileNotFoundError:
-        print(f"Error, file '{nama_file}' tidak ditemukan!")
-    except Exception as e:
-        print(f"Error , terjadi kesalahan: {e}")
-        return None
+def read_sheet(nama_file):  
+    try:  
+        data = []  
+        excel_file = pd.ExcelFile(nama_file)  
+        for _, sheet in enumerate(excel_file.sheet_names):  
+            data.append(sheet)  
+        return data  
+    except FileNotFoundError:  
+        print(f"File '{nama_file}' not found!")  
+    except Exception as e:  
+        print(f"Error: {e}")  
+        return None  
  
 def read_column(nama_file, sheet_name):
     try:
@@ -25,17 +24,15 @@ def read_column(nama_file, sheet_name):
         excel_file = pd.read_excel(nama_file, sheet_name=sheet_name)
         for col in excel_file:
             rescol.append(col)
-            # print(f"- {col}")
         return rescol
-        # selected_column_excel_file = excel_file[columns]
     except FileNotFoundError:
-        print(f"Error: file '{nama_file}' tidak ditemukan!")
+        print(f"File '{nama_file}' not found!")  
         return None
     except KeyError as e: 
-        print(f"Error: kolom '{e}' tidak ditemukan didalam file excel!")
+        print(f"Error: {e}")
         return None
     except Exception as e:
-        print(f"terjadi kesalahan: {e}")
+        print(f"Error: {e}")
         return None
     
 def read_data(nama_file, sheet_name, column):

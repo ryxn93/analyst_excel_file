@@ -48,7 +48,7 @@ def read_data(nama_file, sheet_name, column):
         return None
     
 def main():
-    file_name = "../../data/Data Pengajuan - Penerbitan 2024-11.xlsx"
+    file_name = "./data/Data Pengajuan - Penerbitan 2024-11.xlsx"
     
     sheets = read_sheet(file_name)
     

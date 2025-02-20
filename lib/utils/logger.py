@@ -1,5 +1,6 @@
 from datetime import datetime
 from lib.utils.colors import TC
+import pandas as pd
 
 class Logger:
     """Custom Logger class for formatted console output with color coding.
@@ -86,3 +87,63 @@ class Logger:
         current_time = cls._get_time_for_log_format()
         function_name = f"funcName: {func_name}" if func_name else ""
         print(f"{TC.dim}[{current_time}]{TC.reset} {TC.C}[{type_}]{TC.reset} {function_name}: {message}")
+
+
+# class Example:
+#     def __init__(self, file_name, column_name = False):
+#         self.file_name = file_name
+#         self.column_name = column_name
+        
+    
+#     def read_sheet(self):
+#         try:
+#             excel_file = pd.ExcelFile(self.file_name)
+#             Logger.success("File excel berhasil dibaca!")
+#             return list(excel_file.sheet_names)
+#         except FileNotFoundError:
+#             Logger.error(f"Error, file '{self.file_name}' tidak ditemukan!")
+#             return None
+#         except Exception as e:
+#             Logger.error(f"Error , terjadi kesalahan: {e}")
+#             return None
+        
+#     def read_column(self, sheet_name = False):
+        
+#         try:
+#             # if not (sheet_name):
+#             #     input_sheet = int(input("input sheet: "))
+#             #     excel_file = pd.read_excel(self.file_name, sheet_name=input_sheet)
+#             #     return excel_file
+#             a = []
+#             excel_file = pd.read_excel(self.file_name, sheet_name=sheet_name)
+#             for i in excel_file:
+#                 a.append(i)
+#             # return list(excel_file)
+#             return a
+#         except FileNotFoundError:
+#             Logger.error(f"Error: file '{self.file_name}' tidak ditemukan!")
+#             return None
+#         except KeyError as e: 
+#             Logger.error(f"Error: kolom '{e}' tidak ditemukan didalam file excel!")
+#             return None
+#         except Exception as e:
+#             Logger.error(f"terjadi kesalahan: {e}")
+#             return None
+        
+#     def read_data(self, sheet_name, column):
+#         try:
+#             Logger.warn(f"colll: {column}")
+#             excel_file = pd.read_excel(self.file_name, sheet_name=sheet_name)
+#             selected_data = excel_file[column]
+#             return selected_data[0:11]
+#         except KeyError as e:
+#             Logger.error(f"Error: kolom '{column}' tidak ditemukan!")
+#             return None
+#         except Exception as e:
+#             Logger.error(f"terjadi kesalahan: {e}")
+#             return None
+        
+        
+# ex = Example(file_name="D:\data_analyst\data\Data Pengajuan - Penerbitan 2024-11.xlsx", column_name="asdf")
+
+# ex.read_sheet()
